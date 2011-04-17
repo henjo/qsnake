@@ -16,6 +16,13 @@ Install prerequisites, on Ubuntu, do::
 
     sudo apt-get install gcc, g++, gfortran, python, git
 
+On RHEL4 based distros, the epel repository is needed to get python-simplejson and git, do::
+
+    wget http://download.fedoraproject.org/pub/epel/4/i386/epel-release-4-10.noarch.rpm
+    rpm -i epel-release-4-10.noarch.rpm
+
+    yum install gcc gcc-c++ gcc4-gfortran python python-simplejson git
+
 Download external packages and install qsnake::
 
     ./qsnake -d
