@@ -556,7 +556,6 @@ def build(cpu_count=0):
     packages_list = [
             # Basics:
             "git",
-            "libqsnake",
 
             # SciPy stack
             "ipython",
@@ -565,14 +564,6 @@ def build(cpu_count=0):
             "matplotlib",
             "h5py",
 
-            # PDE packages:
-            "fipy",
-            "sfepy",
-            "phaml",
-
-            # Electronic structure packages:
-            "gpaw",
-            "elk",
             ]
     try:
         for pkg in packages_list:
