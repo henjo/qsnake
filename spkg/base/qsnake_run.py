@@ -248,7 +248,7 @@ def cmd(s, capture=False):
     return output
 
 def create_package(package):
-    git_repo = "https://github.com/qsnake/" + package + ".git"
+    git_repo = "git://github.com/qsnake/" + package + ".git"
     a = git_repo.rfind("/") + 1
     b = git_repo.rfind(".git")
     dir_name = git_repo[a:b]
