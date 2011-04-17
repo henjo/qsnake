@@ -10,7 +10,11 @@ import tempfile
 import subprocess
 import time
 import urllib2
-import json
+
+try:
+    import json
+except:
+    import simplejson as json
 
 version = "0.9.10.beta1"
 release_date = "November 21, 2010"
@@ -43,7 +47,7 @@ Commands:
   list                  Lists all installed packages
   test                  Runs the Qsnake testsuite""")
     parser.add_option("-i", "--install",
-            action="store", type="str", dest="install", metavar="PACKAGE",
+            action="store",  dest="install", metavar="PACKAGE",
             default="", help="install a spkg package")
     parser.add_option("-f", "--force",
             action="store_true", dest="force",
@@ -61,29 +65,29 @@ Commands:
             action="store_true", dest="shell",
             default=False, help="starts a Qsnake shell")
     parser.add_option("-s", "--script",
-            action="store", type="str", dest="script", metavar="SCRIPT",
+            action="store",  dest="script", metavar="SCRIPT",
             default=None, help="runs '/bin/bash SCRIPT' in a Qsnake shell")
     # Not much used:
     #parser.add_option("--python",
-    #        action="store", type="str", dest="python", metavar="SCRIPT",
+    #        action="store",  dest="python", metavar="SCRIPT",
     #        default=None, help="runs 'python SCRIPT' in a Qsnake shell")
 
     # These are not used either:
     #parser.add_option("--unpack",
-    #        action="store", type="str", dest="unpack", metavar="PACKAGE",
+    #        action="store",  dest="unpack", metavar="PACKAGE",
     #        default=None, help="unpacks the PACKAGE into the 'devel/' dir")
     #parser.add_option("--pack",
-    #        action="store", type="str", dest="pack", metavar="PACKAGE",
+    #        action="store",  dest="pack", metavar="PACKAGE",
     #        default=None, help="creates 'devel/PACKAGE.spkg' from 'devel/PACKAGE'")
     #parser.add_option("--devel-install",
-    #        action="store", type="str", dest="devel_install", metavar="PACKAGE",
+    #        action="store",  dest="devel_install", metavar="PACKAGE",
     #        default=None, help="installs 'devel/PACKAGE' into Qsnake directly")
     parser.add_option("--create-package",
-            action="store", type="str", dest="create_package",
+            action="store",  dest="create_package",
             metavar="PACKAGE", default=None,
             help="creates 'PACKAGE.spkg' in the current directory using the official git repository sources")
     parser.add_option("--upload-package",
-            action="store", type="str", dest="upload_package",
+            action="store",  dest="upload_package",
             metavar="PACKAGE", default=None,
             help="upload 'PACKAGE.spkg' from the current directory to the server (for Qsnake developers only)")
     parser.add_option("--release-binary",
@@ -690,9 +694,8 @@ def command_list():
     cmd("cd $QSNAKE_ROOT; ls spkg/installed")
 
 def get_standard_packages():
-    from json import load
     f = open(expandvars("$QSNAKE_ROOT/spkg/base/packages.json"))
-    data = load(f)
+    data = json.load(f)
     QSNAKE_STANDARD = "http://qsnake.googlecode.com/files"
     spkg = []
     git = []
@@ -703,14 +706,15 @@ def get_standard_packages():
                     p["version"] + ".spkg")
         elif download == "qsnake-git":
             git.append(p["name"])
+        elif download.startswith("git://"):
+            git.append(download)
         else:
             raise Exception("Unsupported 'download' field")
     return spkg, git
 
 def get_dependency_graph():
-    from json import load
     f = open(expandvars("$QSNAKE_ROOT/spkg/base/packages.json"))
-    data = load(f)
+    data = json.load(f)
     QSNAKE_STANDARD = "http://qsnake.googlecode.com/files"
     graph = {}
     for p in data:
