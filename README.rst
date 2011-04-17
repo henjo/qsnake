@@ -30,6 +30,13 @@ and::
     cd qsnake-0.9.11
     ./qsnake -b
 
+On RHEL4 based distros, the epel repository is needed to get python-simplejson and git, do::
+
+    wget http://download.fedoraproject.org/pub/epel/4/i386/epel-release-4-10.noarch.rpm
+    rpm -i epel-release-4-10.noarch.rpm
+
+    yum install gcc gcc-c++ gcc4-gfortran python python-simplejson git
+
 Development Version
 ~~~~~~~~~~~~~~~~~~~
 
