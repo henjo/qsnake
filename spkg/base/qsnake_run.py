@@ -7,10 +7,14 @@ from glob import glob
 from os.path import expandvars
 from optparse import OptionParser
 import tempfile
-import subprocess
 import time
 import urllib2
 
+## Python 2.3 compatible import of subprocess and json
+try:
+    import subprocess
+except:
+    import mysubprocess as subprocess
 try:
     import json
 except:
