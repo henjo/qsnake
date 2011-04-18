@@ -546,10 +546,18 @@
     },
     {
         "dependencies": [
-            "blas"
+            "blas",
+	    "fortran"
         ],
         "download": "qsnake-spkg",
         "name": "umfpack",
         "version": "5.5.0"
+    },
+    {
+        "dependencies": [
+        ],
+        "download": "qsnake-spkg",
+        "name": "fortran",
+        "version": "814646f"
     }
 ]
