@@ -573,7 +573,8 @@
     },
     {
         "dependencies": [
-            "blas"
+            "blas",
+	    "fortran"
         ],
         "download": "qsnake-git",
         "name": "umfpack",
@@ -618,5 +619,12 @@
         "download": "qsnake-git",
         "name": "gfortran-osx",
         "version": ""
+    },
+    {
+        "dependencies": [
+        ],
+        "download": "qsnake-spkg",
+        "name": "fortran",
+        "version": "814646f"
     }
 ]
