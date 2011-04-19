@@ -249,7 +249,8 @@
         "dependencies": [
             "python",
             "lapack",
-            "blas"
+            "blas",
+	    "fortran"
         ],
         "download": "qsnake-spkg",
         "name": "numpy",
