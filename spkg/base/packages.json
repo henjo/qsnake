@@ -270,7 +270,8 @@
         "dependencies": [
             "python",
             "lapack",
-            "blas"
+            "blas",
+	    "fortran"
         ],
         "download": "qsnake-git",
         "name": "numpy",
