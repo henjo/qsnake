@@ -89,7 +89,8 @@ Commands:
     parser.add_option("--create-package",
             action="store",  dest="create_package",
             metavar="PACKAGE", default=None,
-            help="creates 'PACKAGE.spkg' in the current directory using the official git repository sources")
+            help="creates 'PACKAGE.spkg' in the current directory using the official git repository sources "
+                 "or download it from the specified github account by specifying PACKAGE as githubaccount,package")
     parser.add_option("--upload-package",
             action="store",  dest="upload_package",
             metavar="PACKAGE", default=None,
@@ -252,7 +253,13 @@ def cmd(s, capture=False):
     return output
 
 def create_package(package):
-    git_repo = "git://github.com/qsnake/" + package + ".git"
+    ghuser = 'qsnake'
+
+    if ',' in package:
+        ghuser, package = package.split(',')
+
+    git_repo = "git://github.com/%s/%s.git" % (ghuser, package)
+
     a = git_repo.rfind("/") + 1
     b = git_repo.rfind(".git")
     dir_name = git_repo[a:b]
@@ -366,7 +373,7 @@ def download_packages():
 
     for p in git:
         # Obtain the latest hash from github:
-        url = "http://github.com/api/v2/json/repos/show/qsnake/%s/branches"
+        url = "http://github.com/api/v2/json/repos/show/%s/%s/branches"
         data = urllib2.urlopen(url % p).read()
         data = json.loads(data)
         commit = data["branches"]["master"]
@@ -377,8 +384,8 @@ def download_packages():
         if os.path.exists(expandvars(path)):
             print "Package '%s' (%s) is current, not updating." % (p, sha)
         else:
-            cmd("rm -f $QSNAKE_ROOT/spkg/standard/%s-*.spkg" % p)
-            cmd("cd $QSNAKE_ROOT/spkg/standard; ../../qsnake --create-package %s" % p)
+            cmd("rm -f $QSNAKE_ROOT/spkg/standard/%s-*.spkg" % p[1])
+            cmd("cd $QSNAKE_ROOT/spkg/standard; ../../qsnake --create-package %s" % p[1])
             print "\n"
 
 def install_package_spkg(pkg):
@@ -708,10 +715,9 @@ def get_standard_packages():
         if download == "qsnake-spkg":
             spkg.append(QSNAKE_STANDARD + "/" + p["name"] + "-" + \
                     p["version"] + ".spkg")
-        elif download == "qsnake-git":
-            git.append(p["name"])
-        elif download.startswith("git://"):
-            git.append(download)
+        elif download.endswith('-git'):
+            ghuser = download.split('-')[0]
+            git.append((ghuser, p["name"]))
         else:
             raise Exception("Unsupported 'download' field")
     return spkg, git
