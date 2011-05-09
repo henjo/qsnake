@@ -284,7 +284,11 @@ def create_package(package):
     if ',' in package:
         ghuser, package = package.split(',')
 
-    git_repo = "http://github.com/%s/%s.git" % (ghuser, package)
+    protocol = 'http'
+    if 'GITPROTOCOL' in os.environ:
+        protocol = os.environ['GITPROTOCOL']
+
+    git_repo = "%s://github.com/%s/%s.git" % (protocol, ghuser, package)
 
     a = git_repo.rfind("/") + 1
     b = git_repo.rfind(".git")
