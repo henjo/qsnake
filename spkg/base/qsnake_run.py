@@ -20,8 +20,8 @@ try:
 except:
     import simplejson as json
 
-version = "0.9.10.beta1"
-release_date = "November 21, 2010"
+version = "0.9.12"
+release_date = "May 7, 2011"
 
 class CmdException(Exception):
     pass
@@ -50,6 +50,12 @@ Commands:
   install PACKAGE       Installs the package 'PACKAGE'
   list                  Lists all installed packages
   test                  Runs the Qsnake testsuite""")
+    parser.add_option("--version",
+            action="store_true", dest="version",
+            default=False, help="print Qsnake version and exit")
+    parser.add_option("-v", "--verbose",
+            action="store_true", dest="verbose",
+            default=False, help="Make Qsnake verbose")
     parser.add_option("-i", "--install",
             action="store",  dest="install", metavar="PACKAGE",
             default="", help="install a spkg package")
@@ -97,19 +103,23 @@ Commands:
             help="upload 'PACKAGE.spkg' from the current directory to the server (for Qsnake developers only)")
     parser.add_option("--release-binary",
             action="store_true", dest="release_binary",
-            default=False, help="Creates a binary release using the current state (for Qsnake developers only)")
+            default=False, help="creates a binary release using the current state (for Qsnake developers only)")
     parser.add_option("--lab",
             action="store_true", dest="run_lab",
-            default=False, help="Runs lab(auth=False)")
+            default=False, help="runs lab()")
     parser.add_option("--verify-database",
             action="store_true", dest="verify_database",
             default=False,
-            help="Verifies the package database integrity")
+            help="verifies the package database integrity")
     parser.add_option("--erase-binary",
             action="store_true", dest="erase_binary",
             default=False,
-            help="Erases all binaries (keeps downloads)")
+            help="erases all binaries (keeps downloads)")
     options, args = parser.parse_args()
+
+    if options.verbose:
+        global global_cmd_echo
+        global_cmd_echo = True
     if len(args) == 1:
         arg, = args
         if arg == "update":
@@ -214,13 +224,16 @@ Commands:
         release_binary()
         return
     if options.run_lab:
-        run_lab(auth=False)
+        run_lab()
         return
     if options.verify_database:
         verify_database()
         return
     if options.erase_binary:
         erase_binary()
+        return
+    if options.version:
+        show_version()
         return
 
     if systemwide_python:
@@ -238,7 +251,20 @@ def setup_cpu(cpu_count):
     if cpu_count > 1:
         os.environ["MAKEFLAGS"] = "-j %d" % cpu_count
 
-def cmd(s, capture=False):
+# If this variable is True, "cmd" will echo each command. It'd be nice to
+# refactor this somehow, so that we don't need this global variable. This
+# variable is set to True if the user passes the "-v" switch to qsnake:
+global_cmd_echo = False
+
+def cmd(s, capture=False, ok_exit_code_list=None, echo=False):
+    """
+    ok_exit_code_list ... a list of ok exit codes (otherwise cmd() raises an
+    exception)
+    """
+    if ok_exit_code_list is None:
+        ok_exit_code_list = [0]
+    if echo or global_cmd_echo:
+        print s
     s = expandvars(s)
     if capture:
         p = subprocess.Popen(s, shell=True, stdout=subprocess.PIPE,
@@ -248,7 +274,7 @@ def cmd(s, capture=False):
     else:
         output = None
         r = os.system(s)
-    if r != 0:
+    if r not in ok_exit_code_list:
         raise CmdException("Command '%s' failed with err=%d." % (s, r))
     return output
 
@@ -258,7 +284,7 @@ def create_package(package):
     if ',' in package:
         ghuser, package = package.split(',')
 
-    git_repo = "git://github.com/%s/%s.git" % (ghuser, package)
+    git_repo = "http://github.com/%s/%s.git" % (ghuser, package)
 
     a = git_repo.rfind("/") + 1
     b = git_repo.rfind(".git")
@@ -272,6 +298,7 @@ def create_package(package):
     cmd("cd %s; git clone --depth 1 %s" % (tmp, git_repo))
     commit = cmd("cd %s/%s; git rev-parse HEAD" % (tmp, dir_name),
             capture=True).strip()
+    cmd("cd %s/%s; rm -rf .git" % (tmp, dir_name))
     sha = commit[:7]
     if os.path.exists("%s/%s/spkg-prepare" % (tmp, dir_name)):
         print "spkg-prepare found, running it..."
@@ -326,6 +353,10 @@ def release_binary():
     print
     print "Package created: %s.tar.gz" % (qsnake_dir)
 
+def show_version():
+    s = "Qsnake Version %s, Release Date: %s" % (version, release_date)
+    print s
+
 def start_qsnake(debug=False):
     if debug:
         print "Loading IPython..."
@@ -343,13 +374,7 @@ def start_qsnake(debug=False):
     l += " " * (banner_length - len(l) - 1) + "|"
     banner += l + "\n" + "-" * banner_length + "\n"
 
-    def lab_wrapper(old = False, auth=True, *args, **kwargs):
-        if old:
-            from sagenb.notebook.notebook_object import lab
-            lab(*args, **kwargs)
-        else:
-            run_lab(auth=auth)
-    namespace = {"lab": lab_wrapper}
+    namespace = {"lab": run_lab}
 
     os.environ["IPYTHONDIR"] = expandvars("$DOT_SAGE/ipython")
     os.environ["IPYTHONRC"] = "ipythonrc"
@@ -362,19 +387,28 @@ def start_qsnake(debug=False):
 
     if debug:
         print "Starting the main loop..."
-    IPython.Shell.start(user_ns=namespace).mainloop(banner=banner)
+    c = IPython.config.loader.Config()
+    c.InteractiveShell.confirm_exit = False
+    IPython.frontend.terminal.embed.InteractiveShellEmbed(config=c,
+            user_ns=namespace, banner1=banner).mainloop()
 
 def download_packages():
     print "Downloading standard spkg packages"
     cmd("mkdir -p $QSNAKE_ROOT/spkg/standard")
-    spkg, git = get_standard_packages()
+    spkg, git, provided = get_standard_packages()
     for p in spkg:
         cmd("cd $QSNAKE_ROOT/spkg/standard; ../base/qsnake-wget %s" % p)
 
     for p in git:
         # Obtain the latest hash from github:
         url = "http://github.com/api/v2/json/repos/show/%s/%s/branches"
-        data = urllib2.urlopen(url % p).read()
+
+        try:
+            data = urllib2.urlopen(url % p).read()
+        except urllib2.HTTPError:
+            print "Can't open the url:", url % p
+            raise
+
         data = json.loads(data)
         commit = data["branches"]["master"]
         sha = commit[:7]
@@ -390,8 +424,11 @@ def download_packages():
 
 def install_package_spkg(pkg):
     print "Installing %s..." % pkg
+    name, version = extract_name_version_from_path(pkg)
     cmd("mkdir -p $QSNAKE_ROOT/spkg/build")
     cmd("mkdir -p $QSNAKE_ROOT/spkg/installed")
+    # Remove the possible old builddir
+    cmd("cd $QSNAKE_ROOT/spkg/build; rm -rf %s-%s" % (name, version))
     try:
         cmd("cd $QSNAKE_ROOT/spkg/build; tar xjf %s" % pkg)
     except CmdException:
@@ -401,12 +438,12 @@ def install_package_spkg(pkg):
         except CmdException:
             print "Not a bz2 nor gzip archive, trying tar..."
             cmd("cd $QSNAKE_ROOT/spkg/build; tar xf %s" % pkg)
-    name, version = extract_name_version_from_path(pkg)
     cmd("cd $QSNAKE_ROOT/spkg/build/%s-%s; chmod +x spkg-install" % (name, version))
     try:
         cmd("cd $QSNAKE_ROOT/spkg/build/%s-%s; . $QSNAKE_ROOT/local/bin/qsnake-env; ./spkg-install" % (name, version))
     except CmdException:
         raise PackageBuildFailed()
+    cmd("cd $QSNAKE_ROOT/spkg/build; rm -rf %s-%s" % (name, version))
 
 def install_package(pkg, install_dependencies=True, force_install=False,
         cpu_count=0):
@@ -492,6 +529,8 @@ def install_package(pkg, install_dependencies=True, force_install=False,
         rmtree(tmpdir)
 
 def is_installed(pkg):
+    if pkg in get_system_packages():
+        return True
     pkg = pkg_make_relative(pkg)
     candidates = glob(expandvars("$QSNAKE_ROOT/spkg/installed/%s" % pkg))
     if len(candidates) == 1:
@@ -551,10 +590,15 @@ def get_dependencies(pkg):
     For simplicity, the dependency graph is currently hardwired in this
     function.
     """
+    provided = get_system_packages()
+    if pkg in provided:
+        return []
     pkg_name = pkg_make_relative(pkg)
     dependency_graph = get_dependency_graph()
     deps = []
     for dep in dependency_graph.get(pkg_name, []):
+        if dep in provided:
+            continue
         deps.extend(get_dependencies(dep))
         deps.append(dep)
     deps = make_unique(deps)
@@ -601,25 +645,21 @@ def wait_for_ctrl_c():
     except KeyboardInterrupt:
         pass
 
-def run_lab(auth=False):
+def run_lab():
     """
-    Runs the online lab.
+    Runs the html notebook.
     """
-    print "Starting Online Lab: Open your web browser at http://localhost:8000/"
+    print "Starting Web GUI: Open your web browser at http://localhost:8888/"
     print "Press CTRL+C to kill it"
     print
+    from IPython.frontend.html.notebook.notebook import NotebookApplication
+    from tornado import httpserver
+    from zmq.eventloop import ioloop
+    application = NotebookApplication()
+    http_server = httpserver.HTTPServer(application)
+    http_server.listen(8888)
+    ioloop.IOLoop.instance().start()
 
-    if auth:
-        cmd("onlinelab core start --home=$SPKG_LOCAL/share/onlinelab/core-home")
-    else:
-        cmd("onlinelab core start --no-auth --home=$SPKG_LOCAL/share/onlinelab/core-home")
-
-    cmd("onlinelab service start --home=$SPKG_LOCAL/share/onlinelab/service-home")
-    try:
-        wait_for_ctrl_c()
-    finally:
-        cmd("onlinelab core stop --home=$SPKG_LOCAL/share/onlinelab/core-home")
-        cmd("onlinelab service stop --home=$SPKG_LOCAL/share/onlinelab/service-home")
 
 def extract_version(package_name):
     """
@@ -695,7 +735,7 @@ def extract_name_version_from_path(p):
 
 def command_update():
     print "Updating the git repository"
-    cmd("cd $QSNAKE_ROOT; git pull https://github.com/qsnake/qsnake.git master")
+    cmd("cd $QSNAKE_ROOT; git pull http://github.com/qsnake/qsnake.git master")
 
     download_packages()
     print "Done."
@@ -704,13 +744,34 @@ def command_list():
     print "List of installed packages:"
     cmd("cd $QSNAKE_ROOT; ls spkg/installed")
 
+def get_system_packages():
+    """get a dict by platform of packages provided by the system."""
+    d = {}
+    d['darwin'] = [
+        'gnutls',
+        'openssl',
+        'termcap',
+        'zlib',
+        'bzip2',
+        'sqlite',
+        'uuid',
+        'blas',
+        'lapack',
+        'curl'
+    ]
+    return d.get(sys.platform, [])
+
 def get_standard_packages():
     f = open(expandvars("$QSNAKE_ROOT/spkg/base/packages.json"))
     data = json.load(f)
     QSNAKE_STANDARD = "http://qsnake.googlecode.com/files"
     spkg = []
     git = []
+    provided = get_system_packages()
     for p in data:
+        if p['name'] in provided:
+            print 'system provided: '+p['name']
+            continue
         download = p["download"]
         if download == "qsnake-spkg":
             spkg.append(QSNAKE_STANDARD + "/" + p["name"] + "-" + \
@@ -720,7 +781,7 @@ def get_standard_packages():
             git.append((ghuser, p["name"]))
         else:
             raise Exception("Unsupported 'download' field")
-    return spkg, git
+    return spkg, git, provided
 
 def get_dependency_graph():
     f = open(expandvars("$QSNAKE_ROOT/spkg/base/packages.json"))

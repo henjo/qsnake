@@ -19,7 +19,8 @@
             "bzip2",
             "gnutls",
             "libpng",
-            "openssl"
+            "openssl",
+            "sqlite"
         ],
         "download": "qsnake-git",
         "name": "python",
@@ -35,9 +36,9 @@
         "dependencies": [
             "python"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "cython",
-        "version": "201012090206_a60b316"
+        "version": ""
     },
     {
         "dependencies": [],
@@ -55,9 +56,27 @@
         "dependencies": [
             "setuptools"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "jinja2",
-        "version": "2.1.1.p0"
+        "version": ""
+    },
+    {
+        "dependencies": [
+            "setuptools"
+        ],
+        "download": "qsnake-git",
+        "name": "werkzeug",
+        "version": ""
+    },
+    {
+        "dependencies": [
+            "setuptools",
+            "jinja2",
+            "werkzeug"
+        ],
+        "download": "qsnake-git",
+        "name": "flask",
+        "version": ""
     },
     {
         "dependencies": [
@@ -138,11 +157,13 @@
     },
     {
         "dependencies": [
-            "python"
+            "python",
+            "tornado",
+            "pyzmq"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "ipython",
-        "version": "bzr1174"
+        "version": ""
     },
     {
         "dependencies": [],
@@ -180,9 +201,9 @@
         "dependencies": [
             "libgpg_error"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "libgcrypt",
-        "version": "1.4.3.p2"
+        "version": ""
     },
     {
         "dependencies": [
@@ -227,9 +248,9 @@
         "dependencies": [
             "python_pycurl"
         ],
-        "download": "qsnake-spkg",
-        "name": "python_tornado",
-        "version": "f732f98"
+        "download": "qsnake-git",
+        "name": "tornado",
+        "version": ""
     },
     {
         "dependencies": [
@@ -252,9 +273,9 @@
             "blas",
 	    "fortran"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "numpy",
-        "version": "1.5.0"
+        "version": ""
     },
     {
         "dependencies": [
@@ -263,9 +284,9 @@
             "python",
             "numpy"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "matplotlib",
-        "version": "0.99.1.p4"
+        "version": ""
     },
     {
         "dependencies": [
@@ -418,17 +439,17 @@
     },
     {
         "dependencies": [],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "hdf5",
-        "version": "1.6.9"
+        "version": ""
     },
     {
         "dependencies": [
             "hdf5"
         ],
-        "download": "qsnake-spkg",
+        "download": "qsnake-git",
         "name": "h5py",
-        "version": "1.2.1.p1"
+        "version": ""
     },
     {
         "dependencies": [
@@ -470,9 +491,7 @@
         "version": "2.1.1"
     },
     {
-        "dependencies": [
-            "python"
-        ],
+        "dependencies": [],
         "download": "qsnake-spkg",
         "name": "sqlite",
         "version": "3.7.2"
@@ -485,6 +504,14 @@
         "download": "qsnake-spkg",
         "name": "pysqlite",
         "version": "2.6.0"
+    },
+    {
+        "dependencies": [
+            "pysqlite"
+        ],
+        "download": "qsnake-git",
+        "name": "google_appengine",
+        "version": ""
     },
     {
         "dependencies": [],
@@ -560,5 +587,36 @@
         "download": "qsnake-spkg",
         "name": "fortran",
         "version": "814646f"
+    },
+    {
+        "dependencies": [
+            "cmake"
+        ],
+        "download": "qsnake-git",
+        "name": "uuid",
+        "version": ""
+    },
+    {
+        "dependencies": [
+            "uuid"
+        ],
+        "download": "qsnake-git",
+        "name": "zeromq",
+        "version": ""
+    },
+    {
+        "dependencies": [
+            "zeromq",
+            "cython"
+        ],
+        "download": "qsnake-git",
+        "name": "pyzmq",
+        "version": ""
+    },
+    {
+        "dependencies": [],
+        "download": "qsnake-git",
+        "name": "gfortran-osx",
+        "version": ""
     }
 ]
