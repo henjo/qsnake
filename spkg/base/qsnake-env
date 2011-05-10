@@ -65,6 +65,10 @@ if [ "$FC" = "" ]; then
     export FC="gfortran"
 fi
 
+if [ "$F77" = "" ]; then
+    export F77="gfortran"
+fi
+
 if [ "$LD" = "" ]; then
     export LD="ld"
 fi
