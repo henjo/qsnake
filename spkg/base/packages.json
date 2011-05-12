@@ -273,7 +273,7 @@
             "blas",
 	    "fortran"
         ],
-        "download": "qsnake-git",
+        "download": "henjo-git",
         "name": "numpy",
         "version": ""
     },
