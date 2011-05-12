@@ -281,8 +281,8 @@ def cmd(s, capture=False, ok_exit_code_list=None, echo=False):
 def create_package(package):
     ghuser = 'qsnake'
 
-    print package.startswith(('git://', 'http://', 'ssh://', 'file://'))
-    if package.startswith(('git://', 'http://', 'ssh://', 'file://')):
+    if package.startswith('git://') or package.startswith('http://') or \
+       package.startswith('ssh://') or package.startswith('file://'):
         git_repo = package
         package = package.split('/')[-1]
         if package.endswith('.git'):
