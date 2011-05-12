@@ -281,18 +281,29 @@ def cmd(s, capture=False, ok_exit_code_list=None, echo=False):
 def create_package(package):
     ghuser = 'qsnake'
 
-    if ',' in package:
-        ghuser, package = package.split(',')
+    print package.startswith(('git://', 'http://', 'ssh://', 'file://'))
+    if package.startswith(('git://', 'http://', 'ssh://', 'file://')):
+        git_repo = package
+        package = package.split('/')[-1]
+        if package.endswith('.git'):
+            package = package[:-4]
+    else:
+        if ',' in package:
+            ghuser, package = package.split(',')
+            protocol = 'http'
+            if 'GITPROTOCOL' in os.environ:
+                protocol = os.environ['GITPROTOCOL']
 
-    protocol = 'http'
-    if 'GITPROTOCOL' in os.environ:
-        protocol = os.environ['GITPROTOCOL']
-
-    git_repo = "%s://github.com/%s/%s.git" % (protocol, ghuser, package)
+        git_repo = "%s://github.com/%s/%s.git" % (protocol, ghuser, package)
 
     a = git_repo.rfind("/") + 1
-    b = git_repo.rfind(".git")
-    dir_name = git_repo[a:b]
+
+    if git_repo.endswith('.git'):
+        b = git_repo.rfind(".git")
+        dir_name = git_repo[a:b]
+    else:
+        dir_name = git_repo[a:]
+
     print "Creating a package in the current directory."
     print "Package name:", package
     print "Git repository:", git_repo
