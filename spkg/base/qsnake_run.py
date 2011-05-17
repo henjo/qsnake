@@ -288,9 +288,9 @@ def create_package(package):
         if package.endswith('.git'):
             package = package[:-4]
     else:
+        protocol = 'http'
         if ',' in package:
             ghuser, package = package.split(',')
-            protocol = 'http'
             if 'GITPROTOCOL' in os.environ:
                 protocol = os.environ['GITPROTOCOL']
 
