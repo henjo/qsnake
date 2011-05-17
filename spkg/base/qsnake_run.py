@@ -280,6 +280,10 @@ def cmd(s, capture=False, ok_exit_code_list=None, echo=False):
 
 def create_package(package):
     ghuser = 'qsnake'
+    if 'GITPROTOCOL' in os.environ:
+        protocol = os.environ['GITPROTOCOL']
+    else:
+        protocol = 'http'
 
     if package.startswith('git://') or package.startswith('http://') or \
        package.startswith('ssh://') or package.startswith('file://'):
@@ -288,11 +292,8 @@ def create_package(package):
         if package.endswith('.git'):
             package = package[:-4]
     else:
-        protocol = 'http'
         if ',' in package:
             ghuser, package = package.split(',')
-            if 'GITPROTOCOL' in os.environ:
-                protocol = os.environ['GITPROTOCOL']
 
         git_repo = "%s://github.com/%s/%s.git" % (protocol, ghuser, package)
 
