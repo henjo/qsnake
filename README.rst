@@ -20,18 +20,21 @@ Install prerequisites:
 * gcc, g++ (>= 4.2 should be enough)
 * python (>= 2.5 should work)
 
-On RHEL4 based distributions, the epel repository is needed to get python-simplejson and git, do::
-
-    wget http://download.fedoraproject.org/pub/epel/4/i386/epel-release-4-10.noarch.rpm
-    rpm -i epel-release-4-10.noarch.rpm
-
 On recent Ubuntu, you can just do::
 
     sudo apt-get install gcc, g++, gfortran, python
 
-On RHEL4 based distributions, do::
+On RHEL4 based distributions, the epel repository is needed to get 
+python-simplejson and git. 
+    wget http://download.fedoraproject.org/pub/epel/4/i386/epel-release-4-10.noarch.rpm
+    rpm -i epel-release-4-10.noarch.rpm
+
+The RHEL4 prerequisites can then be installed as::
 
     yum install gcc4 gcc4-c++ gcc4-gfortran python python-simplejson git
+
+Before building on RHEL4, set the CC and CXX variables as::
+
     export CC=gcc4 CXX=g++4
 
 and::
