@@ -20,22 +20,25 @@ Install prerequisites:
 * gcc, g++ (>= 4.2 should be enough)
 * python (>= 2.5 should work)
 
+On RHEL4 based distributions, the epel repository is needed to get python-simplejson and git, do::
+
+    wget http://download.fedoraproject.org/pub/epel/4/i386/epel-release-4-10.noarch.rpm
+    rpm -i epel-release-4-10.noarch.rpm
+
 On recent Ubuntu, you can just do::
 
     sudo apt-get install gcc, g++, gfortran, python
+
+On RHEL4 based distributions, do::
+
+    yum install gcc4 gcc4-c++ gcc4-gfortran python python-simplejson git
+    export CC=gcc4 CXX=g++4
 
 and::
 
     tar xf qsnake-0.9.11.tar
     cd qsnake-0.9.11
     ./qsnake -b
-
-On RHEL4 based distros, the epel repository is needed to get python-simplejson and git, do::
-
-    wget http://download.fedoraproject.org/pub/epel/4/i386/epel-release-4-10.noarch.rpm
-    rpm -i epel-release-4-10.noarch.rpm
-
-    yum install gcc gcc-c++ gcc4-gfortran python python-simplejson git
 
 Development Version
 ~~~~~~~~~~~~~~~~~~~
